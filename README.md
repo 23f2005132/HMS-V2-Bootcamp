@@ -3,9 +3,11 @@
 ## Backend
 To run backend:
 ```
-    cd backend # Enter Backend
-    python -m venv .env # Creating Virtual Environment
-    source venv/bin/activate  (for git bash)
-    python app.py
+    cd backend # entering backend directory
+    python -m venv venv # creating virtual environment
+    source venv/bin/activate # activating virtual environment
+    pip install -r requirements.txt # installing dependencies
+    python app.py # running the backend application
 ```
 ## Frontend
+Open another terminal and change directory to frontend and run:
