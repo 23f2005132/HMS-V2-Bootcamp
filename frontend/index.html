@@ -10,9 +10,10 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                document.getElementById('message').innerText = data.message;
+                document.getElementById('messafe').innerText = data.message;
             })
             .catch(error => {
+                document.getElementById('message').innerText = 'Error fetching message';
                 console.log('Error fetching message:', error);
             });
     }
