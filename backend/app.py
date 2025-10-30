@@ -6,7 +6,7 @@ CORS(app)
 
 # connecting to database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-from models import db
+from models import db, User
 db.init_app(app)
 
 # connecting routes
@@ -17,5 +17,15 @@ if __name__ == '__main__':
     
     with app.app_context():
         db.create_all()  # Create database tables for our data models
+
+        admin = User.query.filter_by(email='admin@gmail.com').first()
+        
+        if not admin:
+            admin = User(username='admin', password='adminpass', role='admin')
+            db.session.add(admin)
+            db.session.commit()
+            print("Admin user created. Email: admin@gmail.com and password: adminpass")
+        else:
+            print("Admin user already exists.")
 
     app.run(debug=True)

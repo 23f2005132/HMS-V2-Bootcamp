@@ -1,9 +1,12 @@
 from flask_restful import Api, Resource
 from flask import request
 
-from models import db, Pizza
+from models import db, User, Pizza
 
 api = Api()
+
+## Test Endpoints
+
 
 # This is what we NEED to do in mad2 (i.e, returning data instead of HTML)
 class HelloWorld(Resource):
@@ -11,6 +14,31 @@ class HelloWorld(Resource):
         return {'message': 'Hello, World!'}
     
 api.add_resource(HelloWorld, '/')
+
+## AUTH endpoints
+
+class Registration(Resource):
+    def post(self):
+        data = request.get_json()
+        # Registration logic here
+        if not data or 'email' not in data or 'password' not in data:
+            return {'message': 'Email and password are required!'}, 400
+
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            return {'message': 'User already exists!'}, 400
+
+        new_user = User(email=data['email'], password=data['password'])
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {'message': 'User registered successfully!'}, 201
+api.add_resource(Registration, '/register')
+
+
+## ADMIN endpoints
+
+
 
 class PizzaAPI(Resource):
     def get(self, pizza_id=None):
