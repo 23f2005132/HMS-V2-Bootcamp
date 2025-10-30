@@ -1,7 +1,12 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 app= Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = "super-secret"
+jwt = JWTManager(app)
+
 CORS(app)
 
 # connecting to database
@@ -19,9 +24,9 @@ if __name__ == '__main__':
         db.create_all()  # Create database tables for our data models
 
         admin = User.query.filter_by(email='admin@gmail.com').first()
-        
+
         if not admin:
-            admin = User(username='admin', password='adminpass', role='admin')
+            admin = User(email='admin@gmail.com', password='adminpass', role='admin')
             db.session.add(admin)
             db.session.commit()
             print("Admin user created. Email: admin@gmail.com and password: adminpass")

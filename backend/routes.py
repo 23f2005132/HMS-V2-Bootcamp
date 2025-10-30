@@ -1,5 +1,6 @@
 from flask_restful import Api, Resource
 from flask import request
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 from models import db, User, Pizza
 
@@ -35,12 +36,25 @@ class Registration(Resource):
         return {'message': 'User registered successfully!'}, 201
 api.add_resource(Registration, '/register')
 
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        if not data or 'email' not in data or 'password' not in data:
+            return {'message': 'Email and password are required!'}, 400
+        
+        user = User.query.filter_by(email=data['email'], password=data['password']).first()
+        if not user:
+            return {'message': 'Invalid credentials!'}, 401
+        
+        token = create_access_token(identity=user.email)
+        
+        return {'message': 'Login successful!', 'token': token, 'user': {'email': user.email, 'role': user.role}}, 200
+api.add_resource(Login, '/login')
 
-## ADMIN endpoints
-
-
+## USER endpoints
 
 class PizzaAPI(Resource):
+    @jwt_required()
     def get(self, pizza_id=None):
         if pizza_id:
             pizza = Pizza.query.get(pizza_id)
@@ -53,7 +67,12 @@ class PizzaAPI(Resource):
         # print(pizzas)
         return {'pizza': 'Pizzas fetched succesfully!', "pizzas":pizzas}, 200
     
+    @jwt_required()
     def post(self):
+        user = User.query.filter_by(email=get_jwt_identity()).first()
+        if user.role != 'admin':
+            return {'message': 'Admin privilege required!'}, 403
+
         data = request.get_json()
 
         if not data or 'name' not in data and not data['name']:
@@ -65,7 +84,12 @@ class PizzaAPI(Resource):
 
         return {'message': 'Pizza created!'}, 201
     
+    @jwt_required()
     def put(self, pizza_id=None):
+        user = User.query.filter_by(email=get_jwt_identity()).first()
+        if user.role != 'admin':
+            return {'message': 'Admin privilege required!'}, 403
+
         if pizza_id is None:
             return {'message': 'Pizza ID is required for update!'}, 400
         
@@ -84,8 +108,12 @@ class PizzaAPI(Resource):
         db.session.commit()
 
         return {'message': 'Pizza updated!'}, 200
-    
+
+    @jwt_required() 
     def delete(self, pizza_id=None):
+        user = User.query.filter_by(email=get_jwt_identity()).first()
+        if user.role != 'admin':
+            return {'message': 'Admin privilege required!'}, 403
         if pizza_id is None:
             return {'message': 'Pizza ID is required for deletion!'}, 400
         
