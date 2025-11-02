@@ -15,7 +15,7 @@ function loadMessage() {
 </script>
 
 <template>
-  <h1>Welcome to MAD2 Project</h1>
+  <h1>User Login Page</h1>
 
   <p id="message">Click below button to load message</p>
 
